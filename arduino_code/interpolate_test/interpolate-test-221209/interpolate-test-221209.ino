@@ -1,46 +1,21 @@
 #include "PCA9685.h"
 #include <Wire.h>
+#include "definitions.h"
+
+/* Overview of function structure (run this by Abigail)
+
+1. Boot up
+2. Safety checks on all components
+3. Set up one-time software objects
+4. Send analog signals from hall effect sensors to Wekinator
+5. Interpret return signal from Wekinator
+6. Transition state as needed 
+
+*/
 
 ServoDriver servo;
-int potpin = 0;  // analog pin used to connect the potentiometer
-int val;    // variable to read the value from the analog pin
 
-//BIG LENGTH
-#define L 250 //this is a tradeoff between motion resolution AND file size
-
-//Arms!
-#define arm_A 16
-#define arm_B 14
-#define arm_C 13
-#define arm_D 11
-#define arm_E 0
-#define arm_F 0
-
-//Arm Message Queues
-int arm_A_q[L];
-bool arm_A_flag;
-
-int arm_B_q[L];
-bool arm_B_flag;
-
-int arm_C_q[L];
-bool arm_C_flag;
-
-int arm_D_q[L];
-bool arm_D_flag;
-
-int arm_E_q[L];
-bool arm_E_flag;
-
-int arm_F_q[L];
-bool arm_F_flag;
-
-//Test parameters
-int duration = 3000; //ms
-int startAngle = 0;
-int endAngle = 180;
-int delayStep = duration/L;
-
+//Interpolate motions between start state and end state over set duration. Pushes interpolated motions to fixed array
 bool interpolateMotion(int startDeg, int endDeg, int armQueue[]){
 
   //Determine step size
@@ -56,17 +31,25 @@ bool interpolateMotion(int startDeg, int endDeg, int armQueue[]){
   return 1;
 }
 
-void setup() {
-    // join I2C bus (I2Cdev library doesn't do this automatically)
-    Wire.begin();
-    Serial.begin(9600);
-    servo.init(0x7f);
-    // uncomment this line if you need to use a special servo
-    // servo.setServoPulseRange(600,2400,180);
+//TODO - Function to broadcast analog read pins
+void broadcast(){
+  // read the input on analog pin 0:
+  int sensorValue = analogRead(A1);
+  // print out the value you read:
+  Serial.println(sensorValue);
+
+  sensorValue = analogRead(A2);
+  // print out the value you read:
+  Serial.println(sensorValue);
 }
 
-void loop(){
+//TODO - Function to interpret incoming signals from Wekinator
+void stateTransition(){
+  void;
+}
 
+void testSweep(){
+  
   Serial.print(startAngle);
   Serial.print(", ");
   Serial.println(endAngle);
@@ -142,4 +125,25 @@ void loop(){
       arm_D_flag = 0;
     }
   }
+}
+
+void setup() {
+    // join I2C bus (I2Cdev library doesn't do this automatically)
+    Wire.begin();
+    Serial.begin(9600);
+    servo.init(0x7f);
+    // uncomment this line if you need to use a special servo
+    // servo.setServoPulseRange(600,2400,180);
+
+    //Set up transmit port
+
+}
+
+void loop(){
+
+  //broadcast latest analog signals
+  broadcast();
+
+  testSweep();
+  
 }
