@@ -2,14 +2,35 @@
 
 #ifndef definitions_h
 #define definitions_h
-//#define DEBUG
-#undef DEBUG
 #define DEBUG_delay 100
+
+#define DEBUG
+//#undef DEBUG
+#undef TEST_SWEEP
+#define DUMMY_INPUT
+
+//--Arms Pin Positions on Motor Shield--
+#define arm_A_pin 15
+#define arm_B_pin 0
+#define arm_C_pin 0
+#define arm_D_pin 0
+#define arm_E_pin 0
+#define arm_F_pin 0
+
+enum habDir{
+  threeSixty,
+  sixty,
+  oneTwenty,
+  oneEighty,
+  twoForty,
+  threeHundred,
+  defDirection
+};
 
 //--Arm States--
 #define sloper 79
 #define crimp 172
-#define defState 126
+#define normal 126
 
 //--BIG LENGTH -- 
 //Defines the resolution of the arm movements
@@ -36,6 +57,7 @@ class Arm
     void setState(int state);
     bool getFlag();
     void setFlag(bool flag);
+    void position(int endState);
     int getMove(int i);
     void setMove(int val, int i);
 
@@ -84,13 +106,5 @@ int Arm::getMove(int i){
 void Arm::setMove(int val, int i){
   _moveArray[i] = val;
 }
-
-//--Arms Pin Positions on Motor Shield--
-#define arm_A_pin 15
-#define arm_B_pin 0
-#define arm_C_pin 0
-#define arm_D_pin 0
-#define arm_E_pin 0
-#define arm_F_pin 0
 
 #endif
