@@ -2,8 +2,9 @@
 
 #ifndef definitions_h
 #define definitions_h
-#define DEBUG
-//#undef DEBUG
+//#define DEBUG
+#undef DEBUG
+#define DEBUG_delay 100
 
 //--Arm States--
 #define sloper 79
@@ -12,7 +13,11 @@
 
 //--BIG LENGTH -- 
 //Defines the resolution of the arm movements
-#define L 250 
+#ifdef DEBUG
+  #define L 5
+#else if
+  #define L 250
+#endif
 //**this is a tradeoff between motion resolution AND file size (more res, more size)
 
 #define FORWARD 1
@@ -31,8 +36,8 @@ class Arm
     void setState(int state);
     bool getFlag();
     void setFlag(bool flag);
-    int * getMove();
-    void setMove(int * moveArr);
+    int getMove(int i);
+    void setMove(int val, int i);
 
   private:
     int _curState;
@@ -71,19 +76,17 @@ void Arm::setFlag(bool flag){
   _moveFlag = flag;
 };
 
-int * Arm::getMove(){
-  return *_moveArray;
+int Arm::getMove(int i){
+  return _moveArray[i];
 };
 
 
-void Arm::setMove(int * arr){
-  for (int i = 0 ; i < L; i++){
-    _moveArray[i] = &arr[i];
-  }
+void Arm::setMove(int val, int i){
+  _moveArray[i] = val;
 }
 
 //--Arms Pin Positions on Motor Shield--
-#define arm_A_pin 10
+#define arm_A_pin 15
 #define arm_B_pin 0
 #define arm_C_pin 0
 #define arm_D_pin 0
