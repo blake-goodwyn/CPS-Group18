@@ -14,8 +14,9 @@ int MLstate = 0;
 void setup() {
   Serial.begin(9600);  // initialise the serial communication
 
+  pinMode(LED_BUILTIN, OUTPUT);
   // initialize analog pin as an output.
-  pinMode(5, OUTPUT);
+  pinMode(OUTPIN, OUTPUT);
 }
 
 void loop() {
@@ -24,6 +25,8 @@ void loop() {
     // save the message when it arrives
     MLstate = Serial.parseInt();
   }
+
+  Serial.println(MLstate);
 
   switch (MLstate) {
     case 1: //North state
@@ -43,6 +46,9 @@ void loop() {
       break;
   }
 
+  digitalWrite(LED_BUILTIN, HIGH);
   analogWrite(OUTPIN, outVal);  // turn the LED on (HIGH is the voltage level)
-  delay(tDelay);                   // wait for the delayed time                  // wait for the delayed time
+  delay(tDelay/2);                   // wait for the delayed time
+  digitalWrite(LED_BUILTIN, LOW);
+  delay(tDelay/2);
 }
