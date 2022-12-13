@@ -9,13 +9,16 @@
 #undef TEST_SWEEP
 #define DUMMY_INPUT
 
-//--Arms Pin Positions on Motor Shield--
+// --Arms Pin Positions on Motor Shield--
 #define arm_A_pin 15
-#define arm_B_pin 0
-#define arm_C_pin 0
-#define arm_D_pin 0
+#define arm_B_pin 14
+#define arm_C_pin 12
+#define arm_D_pin 10
 #define arm_E_pin 0
 #define arm_F_pin 0
+
+// --ML Transmit Pin--
+#define ML_PIN A7
 
 enum habDir{
   threeSixty,
@@ -35,7 +38,7 @@ enum habDir{
 //--BIG LENGTH -- 
 //Defines the resolution of the arm movements
 #ifdef DEBUG
-  #define L 5
+  #define L 3
 #else if
   #define L 250
 #endif

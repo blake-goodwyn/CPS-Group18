@@ -5,15 +5,14 @@
 /* Overview of function structure (run this by Abigail)
 
 1. Boot up
-2. Safety checks on all components
-3. Set up one-time software objects
-4. Send analog signals from hall effect sensors to Wekinator
-5. Interpret return signal from Wekinator
-6. Transition state as needed 
+2. Set up one-time software objects
+3. Send analog signals from hall effect sensors to Wekinator
+4. Interpret return signal from Wekinator
+5. Transition to state as needed 
 
 */
 
-//Arm objects
+//Instantiate Arm objects
 Arm ArmA(arm_A_pin, normal);
 Arm ArmB(arm_B_pin, normal);
 Arm ArmC(arm_C_pin, normal);
@@ -92,10 +91,24 @@ void broadcast() {
 }
 
 //TODO - interpret incoming signals
-int receive() {
-  while (Serial.available() == 0) {
+habDir receive() {
+  int state = analogRead(ML_PIN);
+  if (0 < state < 170){
+    return threeSixty;
+  }else if (170 < state < 340){
+    return sixty;
+  }else if (340 < state < 510){
+    return oneTwenty;
+  }else if (510 < state < 680){
+    return oneEighty;
+  }else if (680 < state < 850){
+    return twoForty;
+  }else if (850 < state){
+    return threeHundred;
+  }else{
+    return defDirection;
   }
-  return Serial.parseInt();
+  
 }
 
 //TODO - Function to interpret incoming signals from Wekinator
@@ -255,19 +268,13 @@ void loop() {
   //broadcast latest analog signals
   broadcast();
 
-  /* TODO
-  //receive incoming state signal
-  MLstate = receive();
-  */
 
   #ifdef DUMMY_INPUT
   //transition between states
   if(cFlag == 0){
     #ifdef DUMMY_INPUT
-    #ifdef DEBUG
     Serial.println("Dummy serial input...");
     delay(DEBUG_delay);
-    #endif
     while (Serial.available() == 0){
       void;
     }
@@ -302,6 +309,8 @@ void loop() {
     #endif
     stateTransition(inState);
   };
+  #else
+  stateTransition(receive());
   #endif
 
   //increment all designated arm positions
