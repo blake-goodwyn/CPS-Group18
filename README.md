@@ -11,6 +11,9 @@ The project team consists of:
 
 ## Mechanical Overview 
 ### (Refer to /cad folder)
+
+![Top Level Assembly](https://github.com/blake-goodwyn/CPS-Group18/blob/main/images/tla.png)
+
 The mechanical design of the structure consists of six mechanical arms spaced equally about the structure. Each one consists of a carefully developed 4-bar linkage system driven by a servo arm. The servo arm has a roller that is situated into a slot in a driving link.
 
 ## Software Overview
