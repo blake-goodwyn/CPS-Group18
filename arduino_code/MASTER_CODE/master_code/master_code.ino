@@ -1,16 +1,34 @@
+/*  CPS GROUP 18 MASTER MOTION CODE
+    Written by Blake Goodwyn, Abigail Hoover, and Richard Alexandre
+    This Arduino script facilitates the core functions of the CPS project outcome, ASH, the Adjustable Space Hut.
+    Core functions include:
+    - Instantiating and managing software objects associated with mechanical arms
+    - Encoding state machine model of structure and its transitions
+    - Facilitating smoothed movement of mechanical arms per state machine transitions
+    - Sending analog signals from Hall Effect sensors to Wekinator machine learning model
+    - Decoding Wekinator machine learning model into state transitions
+*/
+
 #include "PCA9685.h"
 #include <Wire.h>
 #include "definitions.h"
 
-/* Overview of function structure (run this by Abigail)
+/* Overview of function structure
 
+SET_UP
 1. Boot up
 2. Set up one-time software objects
+
+LOOP
 3. Send analog signals from hall effect sensors to Wekinator
 4. Interpret return signal from Wekinator
-5. Transition to state as needed 
+5. Transition to state and facilitate motion as needed 
 
 */
+
+// --------------------------------------------------------
+
+// -- INITIALIZATION --
 
 //Instantiate Arm objects
 Arm ArmA(arm_A_pin, sloper);
@@ -28,9 +46,13 @@ int cur_MLstate = -1; //current ML state
 int new_MLstate = -1; //new ML state
 
 //Other variables
-int c;  //global incrementor
-bool cFlag = 0;
-bool dir;
+int c;                //global counter
+bool cFlag = 0;       //motion flag
+bool dir;             //direction boolean for test sweeps
+
+// --------------------------------------------------------
+
+// FUNCTION DEFINITIONS
 
 //Interpolate motions between start state and end state over set duration. Pushes interpolated motions to fixed array
 void interpolateMotion(Arm *arm, int startDeg, int endDeg) {
@@ -38,25 +60,9 @@ void interpolateMotion(Arm *arm, int startDeg, int endDeg) {
   //Determine step size
   float step = (float(endDeg) - float(startDeg)) / (L - 1);
 
-  /*
-  #ifdef DEBUG
-  Serial.print("Step size: ");
-  Serial.println(step);
-  #endif
-  */
-
   //Populate array
   for (int i = 0; i < L; i++) {
     arm->setMove(((i * step) + startDeg), i);
-
-    /* 
-  #ifdef DEBUG
-    Serial.print("Array entry #");
-    Serial.print(i);
-    Serial.print(" : ");
-    Serial.println(arm.getMove(i));
-  #endif
-  */
   }
   #ifdef DEBUG
   Serial.println("Set Flag...");
@@ -65,6 +71,7 @@ void interpolateMotion(Arm *arm, int startDeg, int endDeg) {
   arm->setFlag(1);
 }
 
+//Function to set arm position to defined angle
 void armPosition(Arm *arm, int endState) {
   if(arm->getState() != endState){
     interpolateMotion(arm, arm->getState(), endState);
@@ -104,6 +111,7 @@ int receive(){
   }
 }
 
+//Function to initialize serial contact with Processing script
 void establishContact() {
   while (Serial.available() <= 0) {
   Serial.println("A");   // send a capital A
@@ -111,7 +119,7 @@ void establishContact() {
   }
 }
 
-//TODO - Function to interpret incoming signals from Wekinator
+//Function to encode state machine transitions as interpreted by incoming signals from Wekinator
 void stateTransition(int state) {
   
   switch(state){
@@ -202,14 +210,21 @@ void stateTransition(int state) {
   }
 }
 
+// --------------------------------------------------------
+
+// ONE-TIME SETUP
+
 void setup() {
 
-  // join I2C bus (I2Cdev library doesn't do this automatically)
+  // spin up I2C bus for motor shield comms.
   Wire.begin();
+  
+  // spin up serial bus
   Serial.begin(9600);
+  
+  //initialize servo comms.
   servo.init(0x7f);
-  // uncomment this line if you need to use a special servo
-  // servo.setServoPulseRange(600,2400,180);
+
   #ifdef DEBUG
   Serial.println("");
   Serial.println("");
@@ -217,7 +232,7 @@ void setup() {
   delay(DEBUG_delay);
   #endif
 
-  //set up global incrementor
+  //move arms from sloper position (initialized) to default positions
   #ifdef DEBUG
   Serial.println("Default Positions");
   delay(DEBUG_delay);
@@ -229,6 +244,10 @@ void setup() {
   pinMode(LED_BUILTIN, OUTPUT); // Set pin as OUTPUT
   #endif
 }
+
+// --------------------------------------------------------
+
+// MASTER LOOP FUNCTION
 
 void loop() {
   
@@ -245,8 +264,8 @@ void loop() {
   //broadcast latest analog signals
   broadcast();
 
+  //dummy input branch for testing state transitions without machine learning input
   #ifdef DUMMY_INPUT
-  //transition between states
   if(cFlag == 0){
     #ifdef DEBUG
     Serial.println("Dummy serial input...");
@@ -276,9 +295,10 @@ void loop() {
   }
   #endif
 
-  //increment all designated arm positions
+  //increment all designated arm positions per loaded motion profiles
   cFlag = ArmA.getFlag() || ArmB.getFlag() || ArmC.getFlag() || ArmD.getFlag() || ArmE.getFlag() || ArmF.getFlag();
   if (cFlag) {
+    
     #ifdef DEBUG
     Serial.print("Increment: ");
     Serial.println(c);
@@ -334,10 +354,9 @@ void loop() {
       servo.setAngle(ArmF.getPin(), ArmF.getMove(c));
     }
 
-    c++;
-    if (c >= L) {
+    c++;            //increment global counter
+    if (c >= L) {   //if global counter reaches end of arrays
 
-      
       #ifdef DEBUG
       Serial.println("// End of Movement //");
       delay(DEBUG_delay);
@@ -359,7 +378,7 @@ void loop() {
       ArmE.setFlag(0);
       ArmF.setFlag(0);
 
-      //reset incrementor
+      //reset global counter
       c = 0;
     }
   }
