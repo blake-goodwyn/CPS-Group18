@@ -9,11 +9,11 @@ The project team consists of:
 - Richard Alexandre
 - Richard "Blake" Goodwyn
 
-## Mechanical Overview
-[TBD]
+## Mechanical Overview 
+### (Refer to /cad folder)
+The mechanical design of the structure consists of six mechanical arms spaced equally about the structure. Each one consists of a carefully developed 4-bar linkage system driven by a servo arm. The servo arm has a roller that is situated into a slot in a driving link.
 
 ## Electrical Overview
-[TBD]
 
 ## Software Overview
-[TBD]
+### (Refer to arduino_code)
