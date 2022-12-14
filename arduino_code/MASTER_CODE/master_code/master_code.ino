@@ -24,7 +24,8 @@ Arm ArmF(arm_F_pin, sloper);
 ServoDriver servo;
 
 //State signal from wekinator
-char MLstate;
+int cur_MLstate = -1; //current ML state
+int new_MLstate = -1; //new ML state
 
 //Other variables
 int c;  //global incrementor
@@ -70,39 +71,36 @@ void armPosition(Arm *arm, int endState) {
   }
 }
 
-//TODO - Function to broadcast analog read pins
+//Function to broadcast analog read pins
 void broadcast() {
   // read the input on analog pin 0:
   int sensorValue = analogRead(A1);
   // print out the value you read:
-  #ifdef DEBUG
-  Serial.println("A1 Value:");
-  delay(DEBUG_delay);
-  #endif
   Serial.print(sensorValue);
 
   sensorValue = analogRead(A2);
   // print out the value you read:
-  #ifdef DEBUG
-  Serial.println("A2 Value:");
-  delay(DEBUG_delay);
-  #endif
   Serial.print(", ");
   Serial.println(sensorValue);
 }
 
-void receive(){
-  int val;
-  if (Serial.available()) 
-  { // If data is available to read,
-    val = Serial.parseInt(); // read it and store it in val
+//Function to receive incoming Wekinator class
+int receive(){
+  String val;
+  while (Serial.available() <= 0){
+    Serial.println("waiting...");
   }
+  val = Serial.readString(); // read it and store it in val
+  Serial.print("<receive>: ");
   Serial.println(val);
-  if(0 < val < 7){
-    Serial.println("Blink!");
-    digitalWrite(LED_BUILTIN, HIGH);
-    delay(250);
-    digitalWrite(LED_BUILTIN, LOW);
+  if(val.substring(0,2) == "RM"){
+    Serial.println("Pass check");
+    int state = (val.substring(3)).toInt();
+    Serial.println("State Transition!");
+    Serial.println(state);
+    return state;
+  }else{
+    return -1;
   }
 }
 
@@ -114,10 +112,10 @@ void establishContact() {
 }
 
 //TODO - Function to interpret incoming signals from Wekinator
-void stateTransition(char state) {
+void stateTransition(int state) {
   
   switch(state){
-    case '1':
+    case 1:
     #ifdef DEBUG
       Serial.println("Case: threeSixty");
       delay(DEBUG_delay);
@@ -129,7 +127,7 @@ void stateTransition(char state) {
       armPosition(&ArmE, sloper);
       armPosition(&ArmF, normal);
       break;
-  case '2':
+  case 2:
     #ifdef DEBUG
       Serial.println("Case: sixty");
       delay(DEBUG_delay);
@@ -141,7 +139,7 @@ void stateTransition(char state) {
       armPosition(&ArmE, sloper);
       armPosition(&ArmF, sloper);
       break;
-  case '3':
+  case 3:
     #ifdef DEBUG
       Serial.println("Case: oneTwenty");
       delay(DEBUG_delay);
@@ -153,7 +151,7 @@ void stateTransition(char state) {
       armPosition(&ArmE, normal);
       armPosition(&ArmF, sloper);
       break;
-  case '4':
+  case 4:
     #ifdef DEBUG
       Serial.println("Case: oneEighty");
       delay(DEBUG_delay);
@@ -165,7 +163,7 @@ void stateTransition(char state) {
       armPosition(&ArmE, crimp);
       armPosition(&ArmF, normal);
       break;
-  case '5':
+  case 5:
     #ifdef DEBUG
       Serial.println("Case: twoForty");
       delay(DEBUG_delay);
@@ -177,7 +175,7 @@ void stateTransition(char state) {
       armPosition(&ArmE, crimp);
       armPosition(&ArmF, crimp);
       break;
-  case '6': 
+  case 6: 
     #ifdef DEBUG
       Serial.println("Case: threeHundred");
       delay(DEBUG_delay);
@@ -189,7 +187,7 @@ void stateTransition(char state) {
       armPosition(&ArmE, normal);
       armPosition(&ArmF, crimp);
       break;
-  case '7':
+  case 7:
     #ifdef DEBUG
       Serial.println("Case: defDirection");
       delay(DEBUG_delay);
@@ -202,7 +200,6 @@ void stateTransition(char state) {
       armPosition(&ArmF, normal);
       break;
   }
-
 }
 
 void setup() {
@@ -220,16 +217,17 @@ void setup() {
   delay(DEBUG_delay);
   #endif
 
-  //Set up transmit port
-
   //set up global incrementor
   #ifdef DEBUG
   Serial.println("Default Positions");
   delay(DEBUG_delay);
   #endif
-  stateTransition('7');
+  cur_MLstate = 7;
+  stateTransition(cur_MLstate);
+  #ifndef DUMMY_INPUT
   establishContact();
   pinMode(LED_BUILTIN, OUTPUT); // Set pin as OUTPUT
+  #endif
 }
 
 void loop() {
@@ -247,59 +245,35 @@ void loop() {
   //broadcast latest analog signals
   broadcast();
 
-  //read latest signals
-  receive();
-
   #ifdef DUMMY_INPUT
   //transition between states
   if(cFlag == 0){
-    #ifdef DUMMY_INPUT
+    #ifdef DEBUG
     Serial.println("Dummy serial input...");
     delay(DEBUG_delay);
+    #endif
     while (Serial.available() == 0){
       void;
     }
-    habDir inState;
-    MLstate = Serial.parseInt();
-    switch(MLstate){
-      case 1:
-        inState = threeSixty;
-        break;
-      case 2:
-        inState = sixty;
-        break;
-      case 3:
-        inState = oneTwenty;
-        break;
-      case 4:
-        inState = oneEighty;
-        break;
-      case 5:
-        inState = twoForty;
-        break;
-      case 6:
-        inState = threeHundred;
-        break;
-      case 7:
-        inState = defDirection;
-        break;
-    }
-    #endif
+    new_MLstate = Serial.parseInt();
     #ifdef DEBUG
-    Serial.println("State Transition...");
-    delay(DEBUG_delay);
+    Serial.print("MLstate: ");
+    Serial.println(int(new_MLstate));
     #endif
-    stateTransition(inState);
+    stateTransition(new_MLstate);
   };
   #else
-  if (Serial.available() > 0) { // If data is available to read,
-    MLstate = Serial.read(); // read it and store it in val
-    stateTransition(MLstate);
-    #ifdef DEBUG
-    Serial.println("State transition!");
-    #endif
-    delay(100);
-  } 
+  if (cFlag == 0){
+    new_MLstate = receive();
+    if(new_MLstate != cur_MLstate){
+      stateTransition(new_MLstate);
+      cur_MLstate = new_MLstate;
+      #ifdef DEBUG
+      Serial.print("State: ");
+      Serial.println(cur_MLstate);
+      #endif
+    }
+  }
   #endif
 
   //increment all designated arm positions
@@ -325,7 +299,7 @@ void loop() {
       Serial.println(ArmB.getMove(c));
       delay(DEBUG_delay);
       #endif
-      servo.setAngle(ArmB.getPin(), ArmB.getMove(c));
+      servo.setAngle(ArmB.getPin(), ArmB.getMove(c)+B_OFFSET);
     }
     if (ArmC.getFlag()) {
       #ifdef DEBUG

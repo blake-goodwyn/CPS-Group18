@@ -10,15 +10,12 @@
 //#define DUMMY_INPUT
 
 // --Arms Pin Positions on Motor Shield--
-#define arm_A_pin 15
-#define arm_B_pin 3
-#define arm_C_pin 13
-#define arm_D_pin 2
-#define arm_E_pin 6
-#define arm_F_pin 0
-
-// --ML Transmit Pin--
-#define ML_PIN A7
+#define arm_A_pin 2
+#define arm_B_pin 4
+#define arm_C_pin 16
+#define arm_D_pin 13
+#define arm_E_pin 9
+#define arm_F_pin 11
 
 enum habDir{
   threeSixty,
@@ -31,9 +28,12 @@ enum habDir{
 };
 
 //--Arm States--
-#define sloper 60
-#define crimp 150
-#define normal 100
+#define sloper 110
+#define crimp 180
+#define normal 150
+
+//Trimming
+#define B_OFFSET 20
 
 //--BIG LENGTH -- 
 //Defines the resolution of the arm movements
@@ -48,7 +48,7 @@ enum habDir{
 #define REVERSE 0
 
 //Motion Parameters
-int duration = 1000; //ms
+int duration = 500; //ms
 int delayStep = duration/L;
 
 class Arm
