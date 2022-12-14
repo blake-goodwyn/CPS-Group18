@@ -11,11 +11,11 @@
 
 // --Arms Pin Positions on Motor Shield--
 #define arm_A_pin 2
-#define arm_B_pin 4
-#define arm_C_pin 16
-#define arm_D_pin 13
-#define arm_E_pin 9
-#define arm_F_pin 11
+#define arm_B_pin 16
+#define arm_C_pin 14
+#define arm_D_pin 12
+#define arm_E_pin 5
+#define arm_F_pin 4
 
 enum habDir{
   threeSixty,
