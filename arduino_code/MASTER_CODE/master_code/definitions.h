@@ -1,13 +1,17 @@
-//Defintions.h
+/*  DEFINITIONS.h
+    This is a header file containing relevant constants and definitions for operation of the master_code.ino script
+*/
 
 #ifndef definitions_h
 #define definitions_h
 #define DEBUG_delay 50
 
+//DEBUGGING DEFINITIONS
 //#define DEBUG
 #undef DEBUG
-#undef TEST_SWEEP
-//#define DUMMY_INPUT
+
+#undef TEST_SWEEP       //test sweep tag
+//#define DUMMY_INPUT   //dummy input tag
 
 // --Arms Pin Positions on Motor Shield--
 #define arm_A_pin 2
@@ -17,6 +21,7 @@
 #define arm_E_pin 5
 #define arm_F_pin 4
 
+//enum defined for habitat direction
 enum habDir{
   threeSixty,
   sixty,
@@ -51,6 +56,7 @@ enum habDir{
 int duration = 500; //ms
 int delayStep = duration/L;
 
+//Class definition for mechanical arm object
 class Arm
 {
   public:
@@ -71,6 +77,7 @@ class Arm
     bool _moveFlag;
 };
 
+//Object instantiation function
 Arm::Arm(int pin, int state){
   
   _curState = state;
@@ -81,31 +88,37 @@ Arm::Arm(int pin, int state){
   }
 }
 
+//getter function for Arm pin position on motor shield
 int Arm::getPin(){
   return _pinPosition;
 }
 
+//getter function for current stored Arm position
 int Arm::getState(){
   return _curState;
 }
 
+//setter function for current stored Arm position
 void Arm::setState(int state){
   _curState = state;
 }
 
+//getter function for motion flag
 bool Arm::getFlag(){
   return _moveFlag;
 }
 
+//setter function for motion flag
 void Arm::setFlag(bool flag){
   _moveFlag = flag;
 };
 
+//getter function for element of motion array
 int Arm::getMove(int i){
   return _moveArray[i];
 };
 
-
+//setter function for element of motion array
 void Arm::setMove(int val, int i){
   _moveArray[i] = val;
 }
