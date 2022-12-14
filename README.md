@@ -13,7 +13,11 @@ The project team consists of:
 ### (Refer to /cad folder)
 The mechanical design of the structure consists of six mechanical arms spaced equally about the structure. Each one consists of a carefully developed 4-bar linkage system driven by a servo arm. The servo arm has a roller that is situated into a slot in a driving link.
 
-## Electrical Overview
-
 ## Software Overview
 ### (Refer to arduino_code)
+
+Our software design utilises two scripts and a machine learning model: 
+- an Arduino script (/arduino_code/MASTER_CODE/master_code) that handles motion of servos, packaging sensor inputs for the Wekinator module, 
+and an interprets the feedback from the machine learning module
+- a Processing script (machine_learning/master_processing_script/master_rx_tx_script) that takes in the analog sensor values from the Serial port and passes them to a Wekinator module
+- a Wekinator machine learning module () that takes in 2 inputs in the form of float values and gives one integer output that denotes the class output of the model
