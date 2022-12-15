@@ -8,15 +8,16 @@
 
 //DEBUGGING DEFINITIONS
 //#define DEBUG
-#undef DEBUG
+//#undef DEBUG
 
 #undef TEST_SWEEP       //test sweep tag
 //#define DUMMY_INPUT   //dummy input tag
+//#define TRAIN
 
 // --Arms Pin Positions on Motor Shield--
 #define arm_A_pin 2
 #define arm_B_pin 16
-#define arm_C_pin 14
+#define arm_C_pin 9
 #define arm_D_pin 12
 #define arm_E_pin 5
 #define arm_F_pin 4
@@ -33,19 +34,24 @@ enum habDir{
 };
 
 //--Arm States--
-#define sloper 110
-#define crimp 180
+#define sloper 90
+#define crimp 200
 #define normal 150
 
 //Trimming
-#define B_OFFSET 20
+#define A_OFFSET -10
+#define B_OFFSET 0
+#define C_OFFSET 0
+#define D_OFFSET 0
+#define E_OFFSET 35
+#define F_OFFSET -10
 
 //--BIG LENGTH -- 
 //Defines the resolution of the arm movements
 #ifdef DEBUG
-  #define L 25
+  #define L 15
 #else if
-  #define L 250
+  #define L 50
 #endif
 //**this is a tradeoff between motion resolution AND file size (more res, more size)
 

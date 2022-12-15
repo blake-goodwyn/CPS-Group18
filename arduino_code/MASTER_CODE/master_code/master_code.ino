@@ -50,6 +50,9 @@ int c;                //global counter
 bool cFlag = 0;       //motion flag
 bool dir;             //direction boolean for test sweeps
 
+int timer1 = millis();
+int timer2 = millis();
+
 // --------------------------------------------------------
 
 // FUNCTION DEFINITIONS
@@ -94,8 +97,13 @@ void broadcast() {
 //Function to receive incoming Wekinator class
 int receive(){
   String val;
+  timer1 = millis();
   while (Serial.available() <= 0){
     Serial.println("waiting...");
+    timer2 = millis();
+    if((timer2-timer1)>1000){
+      return -1;
+    }
   }
   val = Serial.readString(); // read it and store it in val
   Serial.print("<receive>: ");
@@ -207,6 +215,18 @@ void stateTransition(int state) {
       armPosition(&ArmE, normal);
       armPosition(&ArmF, normal);
       break;
+  case 8:
+    #ifdef DEBUG
+      Serial.println("Case: defDirection");
+      delay(DEBUG_delay);
+    #endif
+      armPosition(&ArmA, crimp);
+      armPosition(&ArmB, crimp);
+      armPosition(&ArmC, crimp);
+      armPosition(&ArmD, crimp);
+      armPosition(&ArmE, crimp);
+      armPosition(&ArmF, crimp);
+      break;
   }
 }
 
@@ -283,8 +303,9 @@ void loop() {
   };
   #else
   if (cFlag == 0){
+    #ifndef TRAIN
     new_MLstate = receive();
-    if(new_MLstate != cur_MLstate){
+    if((new_MLstate != -1) && (new_MLstate != cur_MLstate)){
       stateTransition(new_MLstate);
       cur_MLstate = new_MLstate;
       #ifdef DEBUG
@@ -292,6 +313,7 @@ void loop() {
       Serial.println(cur_MLstate);
       #endif
     }
+    #endif
   }
   #endif
 
@@ -311,7 +333,7 @@ void loop() {
       Serial.println(ArmA.getMove(c));
       delay(DEBUG_delay);
       #endif
-      servo.setAngle(ArmA.getPin(), ArmA.getMove(c));
+      servo.setAngle(ArmA.getPin(), ArmA.getMove(c)+A_OFFSET);
     }
     if (ArmB.getFlag()) {
       #ifdef DEBUG
@@ -327,7 +349,7 @@ void loop() {
       Serial.println(ArmC.getMove(c));
       delay(DEBUG_delay);
       #endif
-      servo.setAngle(ArmC.getPin(), ArmC.getMove(c));
+      servo.setAngle(ArmC.getPin(), ArmC.getMove(c)+C_OFFSET);
     }
     if (ArmD.getFlag()) {
       #ifdef DEBUG
@@ -335,7 +357,7 @@ void loop() {
       Serial.println(ArmD.getMove(c));
       delay(DEBUG_delay);
       #endif
-      servo.setAngle(ArmD.getPin(), ArmD.getMove(c));
+      servo.setAngle(ArmD.getPin(), ArmD.getMove(c)+D_OFFSET);
     }
     if (ArmE.getFlag()) {
       #ifdef DEBUG
@@ -343,7 +365,7 @@ void loop() {
       Serial.println(ArmE.getMove(c));
       delay(DEBUG_delay);
       #endif
-      servo.setAngle(ArmE.getPin(), ArmE.getMove(c));
+      servo.setAngle(ArmE.getPin(), ArmE.getMove(c)+E_OFFSET);
     }
     if (ArmF.getFlag()) {
       #ifdef DEBUG
@@ -351,7 +373,7 @@ void loop() {
       Serial.println(ArmF.getMove(c));
       delay(DEBUG_delay);
       #endif
-      servo.setAngle(ArmF.getPin(), ArmF.getMove(c));
+      servo.setAngle(ArmF.getPin(), ArmF.getMove(c)+F_OFFSET);
     }
 
     c++;            //increment global counter
