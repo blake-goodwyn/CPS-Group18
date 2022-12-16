@@ -48,7 +48,6 @@ int new_MLstate = -1; //new ML state
 //Other variables
 int c;                //global counter
 bool cFlag = 0;       //motion flag
-bool dir;             //direction boolean for test sweeps
 
 int timer1 = millis();
 int timer2 = millis();
@@ -83,47 +82,70 @@ void armPosition(Arm *arm, int endState) {
 
 //Function to broadcast analog read pins
 void broadcast() {
-  // read the input on analog pin 0:
+  // read the input on analog pin 1:
   int sensorValue = analogRead(A1);
-  // print out the value you read:
   Serial.print(sensorValue);
 
   sensorValue = analogRead(A2);
-  // print out the value you read:
   Serial.print(", ");
   Serial.println(sensorValue);
 }
 
-//Function to receive incoming Wekinator class
+//Function to receive and filter out incoming Wekinator messages
 int receive(){
+  
   String val;
   timer1 = millis();
+  
   while (Serial.available() <= 0){
+    
+    //buffer statement
     Serial.println("waiting...");
+
+    //timer condition to prevent hang up on broadcast calls
     timer2 = millis();
     if((timer2-timer1)>1000){
       return -1;
     }
+
   }
   val = Serial.readString(); // read it and store it in val
+  
+  #ifdef DEBUG
+  //print received message
   Serial.print("<receive>: ");
   Serial.println(val);
+  #endif
+  
+  //filter out Wekinator messages
   if(val.substring(0,2) == "RM"){
+    
+    #ifdef DEBUG
     Serial.println("Pass check");
+    #endif
+
     int state = (val.substring(3)).toInt();
+
+    #ifdef DEBUG
     Serial.println("State Transition!");
     Serial.println(state);
+    #endif
+
     return state;
+
   }else{
+
     return -1;
+
   }
 }
 
 //Function to initialize serial contact with Processing script
 void establishContact() {
+  
   while (Serial.available() <= 0) {
-  Serial.println("A");   // send a capital A
-  delay(300);
+    Serial.println("A");   // send a capital A as generic single-char confirmation
+    delay(300);
   }
 }
 
@@ -257,11 +279,13 @@ void setup() {
   Serial.println("Default Positions");
   delay(DEBUG_delay);
   #endif
+
   cur_MLstate = 7;
   stateTransition(cur_MLstate);
+
+  //reach out to Processing to establish common Serial connection
   #ifndef DUMMY_INPUT
   establishContact();
-  pinMode(LED_BUILTIN, OUTPUT); // Set pin as OUTPUT
   #endif
 }
 
@@ -281,11 +305,13 @@ void loop() {
   delay(DEBUG_delay);
   #endif
 
-  //broadcast latest analog signals
+  // LOOP STEP 1 - Broadcast latest analog signals
   broadcast();
 
-  //dummy input branch for testing state transitions without machine learning input
+  // LOOP STEP 2 - Queue up motion if valid transition is provided
   #ifdef DUMMY_INPUT
+
+  // dummy input branch for testing state transitions without machine learning input
   if(cFlag == 0){
     #ifdef DEBUG
     Serial.println("Dummy serial input...");
@@ -302,8 +328,10 @@ void loop() {
     stateTransition(new_MLstate);
   };
   #else
+
+  // branch for real-time state transitions
   if (cFlag == 0){
-    #ifndef TRAIN
+    #ifndef TRAIN //if defined, provides no state transitions but outputs signals for training
     new_MLstate = receive();
     if((new_MLstate != -1) && (new_MLstate != cur_MLstate)){
       stateTransition(new_MLstate);
@@ -317,8 +345,11 @@ void loop() {
   }
   #endif
 
-  //increment all designated arm positions per loaded motion profiles
+  // LOOP STEP 3 - increment all designated arm positions per loaded motion profiles
+  
+  // define global motion flag
   cFlag = ArmA.getFlag() || ArmB.getFlag() || ArmC.getFlag() || ArmD.getFlag() || ArmE.getFlag() || ArmF.getFlag();
+  
   if (cFlag) {
     
     #ifdef DEBUG

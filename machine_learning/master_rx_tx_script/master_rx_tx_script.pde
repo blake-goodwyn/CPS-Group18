@@ -10,9 +10,15 @@ boolean gettingData = false;
 int numFeatures = 0;
 String featureString = "";
 
+int timer1;
+int timer2;
+
 //Objects for sending OSC
 OscP5 oscP5;
 NetAddress dest;
+
+//message queue
+ArrayList<Integer> outMessages = new ArrayList<Integer>();
 
 // since we're doing serial handshaking, 
 // we need to check if we've heard from the microcontroller
@@ -23,7 +29,10 @@ void setup() {
   size(200, 200);
   
   myPort = new Serial(this, "COM3", 9600);
-  myPort.bufferUntil('\n'); 
+  myPort.bufferUntil('\n');
+  
+  timer1 = millis();
+  timer2 = millis();
   
   //Set up OSC:
   oscP5 = new OscP5(this, 12000); //This port isn't important (we're not receiving OSC)
@@ -46,7 +55,7 @@ void sendFeatures(String[] s) {
     }
     oscP5.send(msg, dest);
     featureString = sb.toString();
-    println("Feature string:", featureString);
+    //println("Feature string:", featureString);
   } catch (Exception ex) {
      println("Encountered exception parsing string: " + ex); 
   }
@@ -98,6 +107,8 @@ void oscEvent(OscMessage theOscMessage) {
       //print("### received an osc message /test with typetag f.");
       //println(" values: "+firstValue);
 
+      
+
       updateArduino((int)firstValue);
       delay(25);
       return;
@@ -110,10 +121,19 @@ void oscEvent(OscMessage theOscMessage) {
 void updateArduino(int newMessage) {
   // check that the message is different from the last one sent
   // if so then update the message
-  arduinoMessage = newMessage;
-  // print for debugging convenience
-  String outStr = "RM:" + str(arduinoMessage);
-  println(outStr);
-  // send the message to the Arduino
-  myPort.write(outStr);
+  if (arduinoMessage != newMessage){
+    arduinoMessage = newMessage;
+    // print for debugging convenience
+    
+    timer2 = millis();
+    //println("Timer2: ", timer2);
+    if ((timer2 - timer1) > 1000){
+      String outStr = "RM:" + str(arduinoMessage) + "\n";
+      println("Sending the following to Arduino:", outStr);
+      // send the message to the Arduino
+      myPort.write(outStr);
+      timer1 = millis();
+      timer2 = timer1;
+    }
+  }
 }

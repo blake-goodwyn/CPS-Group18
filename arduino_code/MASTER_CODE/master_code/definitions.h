@@ -8,46 +8,14 @@
 
 //DEBUGGING DEFINITIONS
 //#define DEBUG
-//#undef DEBUG
+#undef DEBUG
 
 #undef TEST_SWEEP       //test sweep tag
 //#define DUMMY_INPUT   //dummy input tag
 //#define TRAIN
 
-// --Arms Pin Positions on Motor Shield--
-#define arm_A_pin 2
-#define arm_B_pin 16
-#define arm_C_pin 9
-#define arm_D_pin 12
-#define arm_E_pin 5
-#define arm_F_pin 4
-
-//enum defined for habitat direction
-enum habDir{
-  threeSixty,
-  sixty,
-  oneTwenty,
-  oneEighty,
-  twoForty,
-  threeHundred,
-  defDirection
-};
-
-//--Arm States--
-#define sloper 90
-#define crimp 200
-#define normal 150
-
-//Trimming
-#define A_OFFSET -10
-#define B_OFFSET 0
-#define C_OFFSET 0
-#define D_OFFSET 0
-#define E_OFFSET 35
-#define F_OFFSET -10
-
-//--BIG LENGTH -- 
-//Defines the resolution of the arm movements
+// BIG LENGTH 
+// Defines the resolution of the arm movements
 #ifdef DEBUG
   #define L 15
 #else if
@@ -55,26 +23,43 @@ enum habDir{
 #endif
 //**this is a tradeoff between motion resolution AND file size (more res, more size)
 
-#define FORWARD 1
-#define REVERSE 0
-
 //Motion Parameters
 int duration = 500; //ms
 int delayStep = duration/L;
+
+// Arms Pin Positions on Motor Shield
+#define arm_A_pin 2
+#define arm_B_pin 16
+#define arm_C_pin 9
+#define arm_D_pin 12
+#define arm_E_pin 5
+#define arm_F_pin 4
+
+// Arm States
+#define sloper 90
+#define crimp 200
+#define normal 150
+
+// Arm Position Trimming
+#define A_OFFSET -10
+#define B_OFFSET 0
+#define C_OFFSET 0
+#define D_OFFSET 0
+#define E_OFFSET 35
+#define F_OFFSET -10
 
 //Class definition for mechanical arm object
 class Arm
 {
   public:
     Arm::Arm(int pin, int state);
-    int getPin();
     int getState();
     void setState(int state);
-    bool getFlag();
-    void setFlag(bool flag);
-    void position(int endState);
+    int getPin();
     int getMove(int i);
     void setMove(int val, int i);
+    bool getFlag();
+    void setFlag(bool flag);
 
   private:
     int _curState;
@@ -92,6 +77,7 @@ Arm::Arm(int pin, int state){
   for(int i = 0; i < L; i++){
     _moveArray[i] = _curState;
   }
+
 }
 
 //getter function for Arm pin position on motor shield
